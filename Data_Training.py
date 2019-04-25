@@ -448,7 +448,7 @@ coloumb_matrix_all = np.delete(coloumb_matrix_all,[0],axis=0)
 # In[ ]:
 
 
-np.savetxt("Thesis_data_training",coloumb_matrix_all,delimiter=",")
+np.savetxt("Thesis_data_training.csv",coloumb_matrix_all,delimiter=",")
 
 
 # In[ ]:
