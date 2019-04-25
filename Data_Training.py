@@ -431,7 +431,7 @@ coloumb_matrix9 = extract_molecule(load_data9)
 # In[ ]:
 
 
-coloumb_matrix_all = np.zeros(1,2501)
+coloumb_matrix_all = np.zeros((1,2501))
 coloumb_matrix_all = np.concatenate([coloumb_matrix_all,coloumb_matrix0])
 coloumb_matrix_all = np.concatenate([coloumb_matrix_all,coloumb_matrix1])
 coloumb_matrix_all = np.concatenate([coloumb_matrix_all,coloumb_matrix2])
