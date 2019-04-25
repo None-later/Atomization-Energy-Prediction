@@ -11,10 +11,6 @@ import pandas as pd
 import json
 from pandas.io.json import json_normalize #To flatten our json data
 from flatten_json import flatten
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
 
 
 # In[ ]:
