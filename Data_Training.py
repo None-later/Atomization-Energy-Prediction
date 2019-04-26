@@ -4,7 +4,7 @@
 # In[ ]:
 
 
-import time 
+import time
 import numpy as np
 import pandas as pd
 #import sys
@@ -15,15 +15,15 @@ from flatten_json import flatten
 
 # In[ ]:
 
-
+#Compute the time when the computation is begin
 start = time.time()
 
 
 # In[ ]:
 
-
+#This function is created to load the json data and convert it into a matrix
 def load_data_coor(path):
-    
+
     with open(path) as f1:
         chem_data0 = json.load(f1)
     chem_data1 = json_normalize(chem_data0,'atoms',['En','id'],record_prefix='Atoms ')
@@ -35,13 +35,13 @@ def load_data_coor(path):
     chem_data1['Atoms Coor 1'] = chem_data1['Atoms Coor 1'].astype(float)
     chem_data1['Atoms Coor 2'] = chem_data1['Atoms Coor 2'].astype(float)
     chem_data2 = chem_data1.values
-    
+
     return chem_data2
 
 
 # In[ ]:
 
-
+#This is a periodic table function to returning the number of atom or the mass of atom
 def charge(col_atoms_t):
     if col_atoms_t == 'H':
         no_atom = 1
@@ -289,13 +289,13 @@ def charge(col_atoms_t):
     elif col_atoms_t == 'Cn':
         no_atom = 112
         mass = 285
-    
+
     return no_atom
 
 
 # In[ ]:
 
-
+#This function is a function to produce the entry of coloumb matrix
 def coloumb_entry(a,b,row,column,a_coor,b_coor):
     output = 0
     if row==column:
@@ -306,13 +306,13 @@ def coloumb_entry(a,b,row,column,a_coor,b_coor):
         for c in range(3):
             dist += np.power((a_coor[c]-b_coor[c]),2)
         dist   = np.sqrt(dist)
-        output = charge(a)*charge(b)/dist 
+        output = charge(a)*charge(b)/dist
     return output
 
 
 # In[ ]:
 
-
+#This function is a function to produce the coloumb matrix and then save it in a row(data training)
 def row_final_input(molecule_data,atoms_type_data,energy):
     coloumb_input = np.zeros((1,2501))
     for m in range(50):
@@ -335,72 +335,74 @@ def row_final_input(molecule_data,atoms_type_data,energy):
 
 # In[ ]:
 
-
+#This function is a function to filter the molecule with the number of molecule doesnt exceed 50 atoms,
+#and then creating the coloumb matrix and save it in a row.
 def extract_molecule(data):
-    
+
     i           = 0
     atom_number = 0
     bound       = 0
     molecule_matrix = np.zeros((50,3))
     atoms_type      = np.array(range(50),dtype=str).reshape(50,1) #Type of atoms
     final_input_data = np.zeros((1,2501))
-    
+
     while i<len(data):
         if i!=len(data)-1:
-            
+
             if data[i,2]==data[i+1,2]: #PubChemId
-                
+
                 atom_number += 1
                 if atom_number <= 50:
                     atoms_type[i-bound]=data[i,0]
                     for j in range(3):
                         molecule_matrix[i-bound,j] = data[i,j+3]
-                        
+
             else:
-                
+
                 atom_number += 1
                 if atom_number <= 50:
                     atoms_type[i-bound]=data[i,0]
                     for j in range(3):
                         molecule_matrix[i-bound,j] = data[i,j+3]
-                    
+
                     for k in range(i+1-bound,50):
                         atoms_type[k]='-'
                         for l in range(3):
                             molecule_matrix[k,l] = 0
-                
+
                     energy      = data[i,1]
                     new_row     = row_final_input(molecule_matrix,atoms_type,energy)
                     final_input_data = np.concatenate([final_input_data,new_row])
-       
+
                 atom_number = 0
                 bound       = i+1
-                
+
         else:
-            
+
             atom_number += 1
             if atom_number <= 50:
                 atoms_type[i-bound]=data[i,0]
                 for j in range(3):
                     molecule_matrix[i-bound,j] = data[i,j+3]
-                    
+
                 for k in range(i-bound+1,50):
                     atoms_type[k]='-'
                     for l in range(3):
                         molecule_matrix[k,l] = 0
-                            
+
                 energy  = data[i,1]
-                new_row = row_final_input(molecule_matrix,atoms_type,energy) 
+                new_row = row_final_input(molecule_matrix,atoms_type,energy)
                 final_input_data = np.concatenate([final_input_data,new_row])
                 final_input_data = np.delete(final_input_data,[0],axis=0)
         i += 1
-            
+
     return final_input_data
 
 
 # In[ ]:
 
-
+#Load the data from the source (JSON format) and then convert it to dataframes pandas
+#and then convert it to np.array/matrix
 load_data0 = load_data_coor("pubChem_p_00000001_00025000.json")
 load_data1 = load_data_coor("pubChem_p_00025001_00050000.json")
 load_data2 = load_data_coor("pubChem_p_00050001_00075000.json")
@@ -415,7 +417,7 @@ load_data9 = load_data_coor("pubChem_p_00225001_00250000.json")
 
 # In[ ]:
 
-
+#Convert the raw data to coloumb matrix and then save it as data training
 coloumb_matrix0 = extract_molecule(load_data0)
 coloumb_matrix1 = extract_molecule(load_data1)
 coloumb_matrix2 = extract_molecule(load_data2)
@@ -430,7 +432,7 @@ coloumb_matrix9 = extract_molecule(load_data9)
 
 # In[ ]:
 
-
+#Concatenate all of the data training
 coloumb_matrix_all = np.zeros((1,2501))
 coloumb_matrix_all = np.concatenate([coloumb_matrix_all,coloumb_matrix0])
 coloumb_matrix_all = np.concatenate([coloumb_matrix_all,coloumb_matrix1])
@@ -447,19 +449,18 @@ coloumb_matrix_all = np.delete(coloumb_matrix_all,[0],axis=0)
 
 # In[ ]:
 
-
+#Save the data training into CSV file format
 np.savetxt("Thesis_data_training.csv",coloumb_matrix_all,delimiter=",")
 
 
 # In[ ]:
 
-
+#Compute the end of computation time
 end = time.time
 
 
 # In[ ]:
 
-
+#Save the computation time into txt file
 with open('coloumb_comp_time.txt','w') as file5:
     print(end-start,file=file5)
-
