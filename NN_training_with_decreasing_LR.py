@@ -45,7 +45,7 @@ mean_init = 0
 std_init  = 1/np.sqrt(num_input)
 lr_init   = 0.001
 epoch     = 1
-minibatch_size = 10000
+minibatch_size = 10
 
 
 # In[ ]:
